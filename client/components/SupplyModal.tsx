@@ -6,14 +6,70 @@ interface SupplyModalProps {
 }
 
 export default function SupplyModal({ onClose }: SupplyModalProps) {
-  const { publicKey } = useWallet();
+  const { publicKey, connected } = useWallet();
   const [amount, setAmount] = useState('');
   const [token, setToken] = useState('USDC');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSupply = async () => {
-    // Implement supply logic here
-    console.log('Supplying', amount, token);
-    onClose();
+    console.log('🔵 [SupplyModal] handleSupply called');
+    console.log('🔵 [SupplyModal] Wallet connected:', connected);
+    console.log('🔵 [SupplyModal] Public key:', publicKey?.toString());
+    console.log('🔵 [SupplyModal] Amount:', amount);
+    console.log('🔵 [SupplyModal] Token:', token);
+
+    if (!connected || !publicKey) {
+      setError('Wallet not connected');
+      console.error('❌ [SupplyModal] Wallet not connected');
+      return;
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+      setError('Please enter a valid amount');
+      console.error('❌ [SupplyModal] Invalid amount:', amount);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Mock API call for now
+      console.log('🔵 [SupplyModal] Making API call to record transaction');
+      
+      const response = await fetch('http://localhost:5000/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userAddress: publicKey.toString(),
+          type: 'supply',
+          amount: parseFloat(amount),
+          token: token,
+          txHash: 'mock-tx-hash-' + Date.now()
+        })
+      });
+
+      console.log('🔵 [SupplyModal] API response status:', response.status);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ [SupplyModal] Transaction recorded:', result);
+        alert(`Successfully supplied ${amount} ${token}`);
+      } else {
+        const errorData = await response.text();
+        console.error('❌ [SupplyModal] API error:', errorData);
+        setError('Failed to record transaction');
+      }
+    } catch (err) {
+      console.error('❌ [SupplyModal] Error:', err);
+      setError('Network error occurred');
+    } finally {
+      setLoading(false);
+      onClose();
+    }
   };
 
   return (

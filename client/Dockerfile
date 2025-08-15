@@ -1,8 +1,8 @@
 FROM node:18-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-# Install full deps (including dev) for building Next.js
-RUN npm ci
+# Install dependencies (tolerant of missing lockfile)
+RUN npm install
 
 FROM node:18-alpine AS builder
 WORKDIR /app
