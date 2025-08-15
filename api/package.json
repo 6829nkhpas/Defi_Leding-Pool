@@ -10,7 +10,8 @@
     "express": "^4.18.2",
     "mongoose": "^7.2.0",
     "cors": "^2.8.5",
-    "@solana/web3.js": "^1.87.6"
+    "@solana/web3.js": "^1.87.6",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

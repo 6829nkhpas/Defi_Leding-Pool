@@ -1,7 +1,8 @@
 FROM node:18-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+# Install full deps (including dev) for building Next.js
+RUN npm ci
 
 FROM node:18-alpine AS builder
 WORKDIR /app

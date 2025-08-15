@@ -11,9 +11,7 @@ services:
       - NODE_ENV=development
     depends_on:
       - api
-    volumes:
-      - ./client:/app
-      - /app/node_modules
+    # Running built Next.js server; no volume mounts needed
 
   api:
     build:
@@ -26,9 +24,7 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/defilend
     depends_on:
       - mongo
-    volumes:
-      - ./api:/app
-      - /app/node_modules
+    # No volume mounts; using production start
 
   mongo:
     image: mongo:7.0
