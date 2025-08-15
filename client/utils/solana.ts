@@ -1,0 +1,140 @@
+import { Connection, PublicKey } from '@solana/web3.js';
+import { Program, AnchorProvider, web3 } from '@project-serum/anchor';
+import { IDL } from '../idl/defilend';
+
+const PROGRAM_ID = new PublicKey('YourProgramIDHere');
+const NETWORK = 'https://api.devnet.solana.com';
+
+export const connection = new Connection(NETWORK, 'confirmed');
+
+export const getProgram = (provider: AnchorProvider) => {
+  return new Program(IDL, PROGRAM_ID, provider);
+};
+
+export const getLendingPoolPDA = async () => {
+  const [pda] = await PublicKey.findProgramAddress(
+    [Buffer.from('lending_pool')],
+    PROGRAM_ID
+  );
+  return pda;
+};
+
+export const getUserDepositPDA = async (userPublicKey: PublicKey) => {
+  const [pda] = await PublicKey.findProgramAddress(
+    [Buffer.from('user_deposit'), userPublicKey.toBuffer()],
+    PROGRAM_ID
+  );
+  return pda;
+};
+
+export const supplyTokens = async (
+  program: Program,
+  userPublicKey: PublicKey,
+  amount: number,
+  tokenMint: PublicKey
+) => {
+  try {
+    const lendingPool = await getLendingPoolPDA();
+    const userDeposit = await getUserDepositPDA(userPublicKey);
+
+    const tx = await program.methods
+      .supply(new BN(amount))
+      .accounts({
+        lendingPool,
+        userDeposit,
+        user: userPublicKey,
+        tokenMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    return tx;
+  } catch (error) {
+    console.error('Error supplying tokens:', error);
+    throw error;
+  }
+};
+
+export const borrowTokens = async (
+  program: Program,
+  userPublicKey: PublicKey,
+  amount: number,
+  tokenMint: PublicKey
+) => {
+  try {
+    const lendingPool = await getLendingPoolPDA();
+    const userDeposit = await getUserDepositPDA(userPublicKey);
+
+    const tx = await program.methods
+      .borrow(new BN(amount))
+      .accounts({
+        lendingPool,
+        userDeposit,
+        user: userPublicKey,
+        tokenMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    return tx;
+  } catch (error) {
+    console.error('Error borrowing tokens:', error);
+    throw error;
+  }
+};
+
+export const repayTokens = async (
+  program: Program,
+  userPublicKey: PublicKey,
+  amount: number,
+  tokenMint: PublicKey
+) => {
+  try {
+    const lendingPool = await getLendingPoolPDA();
+    const userDeposit = await getUserDepositPDA(userPublicKey);
+
+    const tx = await program.methods
+      .repay(new BN(amount))
+      .accounts({
+        lendingPool,
+        userDeposit,
+        user: userPublicKey,
+        tokenMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    return tx;
+  } catch (error) {
+    console.error('Error repaying tokens:', error);
+    throw error;
+  }
+};
+
+export const withdrawTokens = async (
+  program: Program,
+  userPublicKey: PublicKey,
+  amount: number,
+  tokenMint: PublicKey
+) => {
+  try {
+    const lendingPool = await getLendingPoolPDA();
+    const userDeposit = await getUserDepositPDA(userPublicKey);
+
+    const tx = await program.methods
+      .withdraw(new BN(amount))
+      .accounts({
+        lendingPool,
+        userDeposit,
+        user: userPublicKey,
+        tokenMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    return tx;
+  } catch (error) {
+    console.error('Error withdrawing tokens:', error);
+    throw error;
+  }
+};
