@@ -5,10 +5,88 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const IDL: any = {};
 
-const PROGRAM_ID = new PublicKey('YourProgramIDHere');
-const NETWORK = 'https://api.devnet.solana.com';
+// TODO: Replace with actual deployed program ID
+// For now, use a placeholder that won't crash the app
+const PROGRAM_ID = new PublicKey('11111111111111111111111111111111');
+const NETWORK = 'https://frosty-weathered-gas.solana-devnet.quiknode.pro/f845f5a46b74dbdf6a375cdcd40685e683a806d5';
 
 export const connection = new Connection(NETWORK, 'confirmed');
+
+// RPC Connection Test Functions
+export const testRpcConnection = async () => {
+  try {
+    console.log('🔗 [RPC] Testing connection to:', NETWORK);
+    
+    // Test 1: Get cluster nodes
+    const nodes = await connection.getClusterNodes();
+    console.log('✅ [RPC] Cluster nodes:', nodes.length, 'nodes available');
+    
+    // Test 2: Get recent blockhash
+    const { blockhash } = await connection.getLatestBlockhash();
+    console.log('✅ [RPC] Latest blockhash:', blockhash);
+    
+    // Test 3: Get slot
+    const slot = await connection.getSlot();
+    console.log('✅ [RPC] Current slot:', slot);
+    
+    // Test 4: Get epoch info
+    const epochInfo = await connection.getEpochInfo();
+    console.log('✅ [RPC] Epoch info:', epochInfo);
+    
+    return {
+      success: true,
+      network: NETWORK,
+      nodes: nodes.length,
+      blockhash,
+      slot,
+      epochInfo
+    };
+  } catch (error) {
+    console.error('❌ [RPC] Connection test failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      network: NETWORK
+    };
+  }
+};
+
+export const testWalletConnection = async (publicKey: string) => {
+  try {
+    console.log('🔗 [RPC] Testing wallet connection for:', publicKey);
+    
+    const pubKey = new PublicKey(publicKey);
+    
+    // Test 1: Get account info
+    const accountInfo = await connection.getAccountInfo(pubKey);
+    console.log('✅ [RPC] Account info:', accountInfo ? 'Found' : 'Not found');
+    
+    // Test 2: Get balance
+    const balance = await connection.getBalance(pubKey);
+    console.log('✅ [RPC] Balance:', balance / 1e9, 'SOL');
+    
+    // Test 3: Get token accounts
+    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(pubKey, {
+      programId: TOKEN_PROGRAM_ID
+    });
+    console.log('✅ [RPC] Token accounts:', tokenAccounts.value.length);
+    
+    return {
+      success: true,
+      publicKey,
+      balance: balance / 1e9,
+      tokenAccounts: tokenAccounts.value.length,
+      accountInfo: accountInfo ? 'Found' : 'Not found'
+    };
+  } catch (error) {
+    console.error('❌ [RPC] Wallet test failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      publicKey
+    };
+  }
+};
 
 export const getProgram = (provider: AnchorProvider) => {
   return new Program(IDL, PROGRAM_ID, provider);
