@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+// use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
 declare_id!("11111111111111111111111111111111");
 
@@ -30,6 +30,7 @@ pub mod defilend {
             .amount
             .checked_add(amount)
             .ok_or(ErrorCode::Overflow)?;
+        user_deposit.token_type = "SOL".to_string();
 
         Ok(())
     }
@@ -94,6 +95,7 @@ pub struct InitializePool<'info> {
         bump
     )]
     pub lending_pool: Account<'info, LendingPool>,
+    #[account(mut)]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
@@ -104,13 +106,14 @@ pub struct Supply<'info> {
     #[account(mut)]
     pub lending_pool: Account<'info, LendingPool>,
     #[account(
-        init_if_needed,
+        init,
         payer = user,
         space = 8 + UserDeposit::INIT_SPACE,
         seeds = [b"user_deposit", user.key().as_ref()],
         bump
     )]
     pub user_deposit: Account<'info, UserDeposit>,
+    #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
@@ -153,6 +156,7 @@ pub struct Withdraw<'info> {
 pub struct LendingPool {
     pub total_supplied: u64,
     pub total_borrowed: u64,
+    #[max_len(50)]
     pub interest_rate_model: String,
 }
 
@@ -160,6 +164,7 @@ pub struct LendingPool {
 #[derive(InitSpace)]
 pub struct UserDeposit {
     pub amount: u64,
+    #[max_len(20)]
     pub token_type: String,
 }
 
