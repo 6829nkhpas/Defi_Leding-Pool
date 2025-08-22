@@ -79,7 +79,7 @@ export default function Dashboard() {
     try {
       const result = await testRpcConnection();
       if (result.success) {
-        setRpcStatus(`✅ Connected - Slot: ${result.slot}, Nodes: ${result.nodes}`);
+        setRpcStatus(`✅ Connected - Slot: ${result.slot}, Network: ${result.network}`);
       } else {
         setRpcStatus(`❌ Failed: ${result.error}`);
       }

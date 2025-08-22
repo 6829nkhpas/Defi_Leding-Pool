@@ -1,7 +1,14 @@
-# Use full Node.js image instead of Alpine for better compatibility
-FROM node:20
+# Use Node.js slim image with build dependencies
+FROM node:20-slim
 
 WORKDIR /app
+
+# Install build dependencies for native modules
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
@@ -18,5 +25,5 @@ RUN npm run build
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application using standalone server
+CMD ["node", ".next/standalone/server.js"]
